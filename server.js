@@ -147,7 +147,18 @@ app.post(
   }
 );
 
-app.get("/mypage", function (요청, 응답) {});
+app.get("/mypage", 로그인확인, function (요청, 응답) {
+  console.log(요청.user);
+  응답.render("mypage.ejs", { 사용자: 요청.user });
+});
+
+function 로그인확인(요청, 응답, next) {
+  if (요청.user) {
+    next();
+  } else {
+    응답.send("<script>alert('로그인하세요'); location.href='/login'</script>");
+  }
+}
 
 passport.use(
   new LocalStrategy(
@@ -181,5 +192,7 @@ passport.serializeUser(function (user, done) {
   done(null, user.id);
 });
 passport.deserializeUser(function (아이디, done) {
-  done(null, {});
+  db.collection("login").findOne({ id: 아이디 }, function (에러, 결과) {
+    done(null, 결과);
+  });
 });
